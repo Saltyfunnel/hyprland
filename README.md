@@ -3,10 +3,8 @@
 <h1 align="center">Minimal Hyprland Install Script</h1>
 <h3 align="center">By</h3>
 <h2 align="center">Shell Ninja</h2>
+<h2 align="center">and borrowed by Saltyfunnel</h2>
 <br>
-
-This Hyprland configuration is kind of minila looking, but also little bit gorgeous I guess. Why don't you check it out?
-
 <div align="center">
 
 <br>
