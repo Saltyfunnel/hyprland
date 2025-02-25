@@ -5,7 +5,7 @@
 > You can now easily install the config directly without cloning the repository. Just copy and paste the command bellow in your terminal and run it. Before that, make sure to install `curl`. Install it using pacman, dnf or zypper.
 
 ```
-bash <(curl -s https://raw.githubusercontent.com/shell-ninja/hyprconf-install/main/direct_run.sh)
+bash <(curl -s https://raw.githubusercontent.com/Saltyfunnel/hyprland/main/direct_run.sh)
 ```
 
 > [!NOTE]
@@ -15,7 +15,7 @@ bash <(curl -s https://raw.githubusercontent.com/shell-ninja/hyprconf-install/ma
 > - Clone this repository:
 
 ```
-git clone --depth=1 https://github.com/shell-ninja/hyprconf-install.git
+git clone --depth=1 https://github.com/Saltyfunnel/hyprland.git
 ```
 
 > - Now cd into hyprconf-install directory and run this command.:
