@@ -10,7 +10,7 @@ bash <(curl -s https://raw.githubusercontent.com/Saltyfunnel/hyprland/main/direc
 
 > [!NOTE]
 >
-> ### Manusally Installation
+> ### Manual Installation
 
 > - Clone this repository:
 
