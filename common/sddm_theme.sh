@@ -48,7 +48,7 @@ mkdir -p "$log_dir"
 touch "$log"
 
 # Install THEME
-theme="$parent_dir/assets/minimal_sddm.tar.gz"
+theme="$parent_dir/assets/sugar-candy.tar.gz"
 theme_dir=/usr/share/sddm/themes
 
 # creating sddm theme dir
