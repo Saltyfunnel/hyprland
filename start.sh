@@ -322,7 +322,7 @@ sleep 1
 sleep 1
 
 # setting up the keyboard leyout
-msg att "By default, the keyboard layout will be 'us'"
+msg att "By default, the keyboard layout will be 'gb'"
 gum confirm "Is it ok for you?" \
     --prompt.foreground "#ff8700" \
     --affirmative "Yes! Set" \
