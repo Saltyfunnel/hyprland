@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # ───────────────────────────────────────────────
-# Saltyfunnel’s Hyprland One-Shot Installer
-# Builds HyprYou and Greeter as proper packages
+# Saltyfunnel’s Hyprland One-Shot Installer (Fully Automatic)
+# Installs HyprYou + utils + greeter without prompts
 # ───────────────────────────────────────────────
 set -euo pipefail
 
-echo -e "🌈 Hyprland One-Shot Installer"
+echo -e "🌈 Hyprland One-Shot Installer (Fully Automatic)"
 echo "────────────────────────────"
 
 CLONE_DIR="$(pwd)"
@@ -52,65 +52,22 @@ install_aur_deps() {
 }
 
 # ───────────────────────────────────────────────
-# Create temporary PKGBUILD for main HyprYou
-create_hypryou_pkg() {
-    echo "⚡ Creating temporary PKGBUILD for HyprYou..."
-    TEMP_DIR="$CLONE_DIR/hypryou-pkg"
-    mkdir -p "$TEMP_DIR"
+# Build and install a package via makepkg
+build_pkg() {
+    local dir="$1"
+    if [[ -d "$dir" ]]; then
+        echo "🔧 Building and installing package in $dir..."
+        pushd "$dir" >/dev/null
 
-    cat > "$TEMP_DIR/PKGBUILD" <<'EOF'
-# Maintainer: Saltyfunnel
-pkgname=hypryou
-pkgver=1.0.0
-pkgrel=1
-pkgdesc="HyprYou - Main Hyprland Material You Package"
-arch=('x86_64')
-license=('GPL3')
-depends=('gtk4' 'python' 'python-pillow')
-source=()
-sha256sums=()
-package() {
-    mkdir -p "$pkgdir/usr/lib/hypryou"
-    cp -r ../hypryou/* "$pkgdir/usr/lib/hypryou/"
-    cp -r ../hypryou-assets "$pkgdir/usr/share/hypryou/"
-    install -Dm755 ../build/hypryouctl "$pkgdir/usr/bin/hypryouctl"
-    install -Dm755 ../build/hypryou-start "$pkgdir/usr/bin/hypryou-start"
-    install -Dm755 ../build/hypryou-crash-dialog "$pkgdir/usr/bin/hypryou-crash-dialog"
-    install -Dm644 ../assets/hypryou.desktop "$pkgdir/usr/share/wayland-sessions/hypryou.desktop"
-}
-EOF
-}
+        # Remove hypryou dependency in greeter PKGBUILD to avoid errors
+        if [[ "$dir" == "greeter" ]] && grep -q "depends=('hypryou')" PKGBUILD; then
+            sed -i "s/depends=('hypryou')/depends=()/g" PKGBUILD
+        fi
 
-# ───────────────────────────────────────────────
-# Build & install HyprYou via makepkg
-build_main_pkg() {
-    echo "🔧 Building main HyprYou package..."
-    pushd "$CLONE_DIR/hypryou" >/dev/null
-    ./build.sh || { echo "❌ Failed to build hypryou/"; exit 1; }
-    popd >/dev/null
-
-    pushd "$CLONE_DIR/build" >/dev/null
-    ./build.sh || { echo "❌ Failed to build build/"; exit 1; }
-    popd >/dev/null
-
-    create_hypryou_pkg
-    pushd "$CLONE_DIR/hypryou-pkg" >/dev/null
-    makepkg -si --noconfirm || { echo "❌ Failed to build HyprYou package"; exit 1; }
-    popd >/dev/null
-}
-
-# ───────────────────────────────────────────────
-# Install optional greeter
-install_greeter() {
-    GREETER_DIR="$CLONE_DIR/greeter"
-    if [[ -d "$GREETER_DIR" ]]; then
-        echo "👋 Installing HyprYou Greeter..."
-        pushd "$GREETER_DIR" >/dev/null
-        makepkg -si --noconfirm || { echo "❌ Failed to build greeter"; popd >/dev/null; return; }
+        makepkg -si --noconfirm || { echo "❌ Failed to build/install $dir"; popd >/dev/null; exit 1; }
         popd >/dev/null
-        echo "⚠️ Remember to configure greetd to use hypryou-greeter as the session."
     else
-        echo "⚠️ Greeter folder not found, skipping."
+        echo "⚠️ Folder $dir not found, skipping."
     fi
 }
 
@@ -121,17 +78,17 @@ main() {
     install_system_deps
     install_aur_deps
 
-    build_main_pkg
+    # Build & install main HyprYou first
+    build_pkg "hypryou"
 
-    echo -e "\n⚠️ hypryou-utils is optional and must be installed manually with makepkg -si in hypryou-utils/"
+    # Build & install hypryou-utils automatically
+    build_pkg "hypryou-utils"
 
-    echo -n "👋 Install HyprYou Greeter (optional)? [y/N]: "
-    read -r greeter_choice
-    if [[ "$greeter_choice" =~ ^[Yy]$ ]]; then
-        install_greeter
-    fi
+    # Build & install greeter automatically
+    build_pkg "greeter"
+    echo "⚠️ Remember to configure greetd to use hypryou-greeter as the session."
 
-    echo -e "\n✅ Hyprland Material You installed successfully!"
+    echo -e "\n✅ Hyprland Material You fully installed!"
     echo "→ You can now select 'HyprYou' in your display/login manager."
 }
 
