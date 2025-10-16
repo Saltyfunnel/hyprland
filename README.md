@@ -82,11 +82,9 @@ HyprYou (hyprland-material-you v2). It aims to provide a modern, feature-rich, a
 
 </details>
 
-## Thanks to
+## Credits
 
-- All people from my discord server
-- All Sponsors (I love y'all!)
-- [Astal](https://github.com/Aylur/astal): For Bluetooth and WirePlumber services
-- [Gtk4LayerShell](https://github.com/wmww/gtk4-layer-shell): For LayerShell
-- [Hyprland](https://github.com/hyprwm/Hyprland): For the best TWM I've ever seen
-- Maybe that's it
+Original project by [koeqaife](https://github.com/koeqaife/hyprland-material-you)  
+Modified and packaged by [Saltyfunnel](https://github.com/Saltyfunnel)  
+Includes automated installer: `install-hypryou.sh`
+
