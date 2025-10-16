@@ -1,31 +1,23 @@
 #!/usr/bin/env bash
 # ───────────────────────────────────────────────
-#  Saltyfunnel’s Hyprland Material You Installer
+# Saltyfunnel’s Hyprland Material You Installer
+# Works from local repo
 # ───────────────────────────────────────────────
-# Based on: koeqaife/hyprland-material-you
-# Adapted for automation by ChatGPT (GPT-5)
-# For: Arch / EndeavourOS / Garuda systems
-# ───────────────────────────────────────────────
-
 set -euo pipefail
 
-echo -e "🌈 Welcome to Saltyfunnel’s Hyprland (Material You Edition) Installer!"
-echo "───────────────────────────────────────────────"
-sleep 1
+echo -e "🌈 Hyprland Material You - Installer"
+echo "─────────────────────────────────────────"
 
-# Use the current folder as repo path
 CLONE_DIR="$(pwd)"
-REPO="https://github.com/koeqaife/hyprland-material-you.git"
 AUR_HELPER=""
 PKG_MANAGER="sudo pacman -S --needed --noconfirm"
 
-# ───────────────────────────────────────────────
 # Ensure all .sh files are executable
 echo "🔧 Setting build scripts executable..."
 find "$CLONE_DIR" -type f -name "*.sh" -exec chmod +x {} \;
 
 # ───────────────────────────────────────────────
-# Helper functions
+# Dependency functions
 
 detect_aur_helper() {
     for helper in yay paru trizen; do
@@ -39,16 +31,7 @@ detect_aur_helper() {
     exit 1
 }
 
-aur_install() {
-    echo "📦 Installing AUR dependencies..."
-    $AUR_HELPER -S --needed --noconfirm \
-        python-materialyoucolor-git \
-        libastal-bluetooth-git \
-        libastal-wireplumber-git \
-        ttf-material-symbols-variable-git
-}
-
-pacman_install() {
+install_system_deps() {
     echo "📦 Installing system dependencies..."
     $PKG_MANAGER \
         gtk4-layer-shell dart-sass python python-gobject python-pam gtk4 \
@@ -59,56 +42,31 @@ pacman_install() {
         networkmanager hyprshot
 }
 
-clone_repo() {
-    echo "📥 Cloning Hyprland Material You repository (if needed)..."
-    # Only clone if folder doesn't exist
-    if [[ ! -d "$CLONE_DIR/hypryou" ]]; then
-        git clone --depth=1 "$REPO" "$CLONE_DIR"
-    else
-        echo "ℹ️ Repo folder already exists, skipping clone."
-    fi
+install_aur_deps() {
+    echo "📦 Installing AUR dependencies..."
+    $AUR_HELPER -S --needed --noconfirm \
+        python-materialyoucolor-git \
+        libastal-bluetooth-git \
+        libastal-wireplumber-git \
+        ttf-material-symbols-variable-git
 }
+
+# ───────────────────────────────────────────────
+# Build / install main package
 
 build_main() {
     echo "🔧 Building main HyprYou..."
-    if [[ -d "$CLONE_DIR/hypryou" ]]; then
-        pushd "$CLONE_DIR/hypryou" >/dev/null
-        ./build.sh || { echo "❌ Build failed (hypryou)."; exit 1; }
-        popd >/dev/null
+    pushd "$CLONE_DIR/hypryou" >/dev/null
+    ./build.sh || { echo "❌ Build failed in hypryou/"; exit 1; }
+    popd >/dev/null
 
-        pushd "$CLONE_DIR/build" >/dev/null
-        ./build.sh || { echo "❌ Build failed (main build)."; exit 1; }
-        popd >/dev/null
-    else
-        echo "❌ Main hypryou folder missing, cannot build."
-        exit 1
-    fi
-}
-
-build_utils() {
-    if [[ -d "$CLONE_DIR/hypryou-utils" ]]; then
-        echo "🧩 Building HyprYou Utils..."
-        pushd "$CLONE_DIR/hypryou-utils" >/dev/null
-        ./build.sh || { echo "❌ Build failed (utils)."; exit 1; }
-        popd >/dev/null
-    else
-        echo "⚠️ Skipping Utils: folder not found."
-    fi
-}
-
-build_greeter() {
-    if [[ -d "$CLONE_DIR/hypryou-greeter" ]]; then
-        echo "👋 Building HyprYou Greeter..."
-        pushd "$CLONE_DIR/hypryou-greeter" >/dev/null
-        ./build.sh || { echo "❌ Build failed (greeter)."; exit 1; }
-        popd >/dev/null
-    else
-        echo "⚠️ Skipping Greeter: folder not found."
-    fi
+    pushd "$CLONE_DIR/build" >/dev/null
+    ./build.sh || { echo "❌ Build failed in build/"; exit 1; }
+    popd >/dev/null
 }
 
 install_main() {
-    echo "⚙️ Installing main components..."
+    echo "⚙️ Installing main HyprYou components..."
     sudo mkdir -p /usr/share/hypryou
     sudo cp -r "$CLONE_DIR/hypryou-assets" /usr/share/hypryou/
     sudo cp -r "$CLONE_DIR/hypryou" /usr/lib/
@@ -118,73 +76,43 @@ install_main() {
     sudo install -Dm644 "$CLONE_DIR/assets/hypryou.desktop" /usr/share/wayland-sessions/hypryou.desktop
 }
 
-install_utils() {
-    if [[ -d "$CLONE_DIR/hypryou-utils" ]]; then
-        echo "🧰 Installing HyprYou Utils..."
-        sudo mkdir -p /usr/share/hypryou-utils
-        sudo cp -r "$CLONE_DIR/hypryou-utils" /usr/lib/
-        sudo install -Dm755 "$CLONE_DIR/hypryou-utils/hypryou-utils" /usr/bin/hypryou-utils
-    else
-        echo "⚠️ Skipping Utils installation: folder not found."
-    fi
-}
+# ───────────────────────────────────────────────
+# Optional components
 
 install_greeter() {
     if [[ -d "$CLONE_DIR/hypryou-greeter" ]]; then
-        echo "🙋 Installing HyprYou Greeter..."
-        sudo mkdir -p /usr/share/hypryou-greeter
-        sudo cp -r "$CLONE_DIR/hypryou-greeter" /usr/lib/
-        sudo install -Dm755 "$CLONE_DIR/hypryou-greeter/hypryou-greeter" /usr/bin/hypryou-greeter
+        echo "👋 Installing HyprYou Greeter..."
+        pushd "$CLONE_DIR/hypryou-greeter" >/dev/null
+        echo "⚡ Running makepkg -si for hypryou-greeter..."
+        makepkg -si || { echo "❌ Failed to build/install greeter"; popd >/dev/null; return; }
+        popd >/dev/null
         echo "⚠️ Remember to configure greetd to use hypryou-greeter if desired."
     else
-        echo "⚠️ Skipping Greeter installation: folder not found."
+        echo "⚠️ Greeter folder not found, skipping."
     fi
-}
-
-clean_up() {
-    echo "🧹 Cleaning up temporary files..."
-    # No deletion needed if using repo folder directly
-}
-
-done_message() {
-    echo -e "\n✅ Installation complete!"
-    echo "🚀 Welcome to Saltyfunnel’s Hyprland (Material You Edition)"
-    echo "───────────────────────────────────────────────"
-    echo "→ You can now select 'HyprYou' in your display/login manager."
-    echo "→ If you installed the Greeter, edit /etc/greetd/config.toml to enable it."
-    echo -e "\n💡 Tip: Restart your session or reboot to apply changes fully."
 }
 
 # ───────────────────────────────────────────────
 # Main flow
 
 main() {
-    echo "🌈 Saltyfunnel’s Hyprland Installer (Material You Edition)"
-    echo "─────────────────────────────────────────"
-
     detect_aur_helper
-    pacman_install
-    aur_install
-    clone_repo
+    install_system_deps
+    install_aur_deps
+
     build_main
     install_main
 
-    echo -n "🧩 Install HyprYou Utils (optional)? [y/N]: "
-    read -r utils_choice
-    if [[ "$utils_choice" =~ ^[Yy]$ ]]; then
-        build_utils
-        install_utils
-    fi
-
+    echo -e "\n⚠️ hypryou-utils is optional and must be installed manually with makepkg -si in hypryou-utils/"
+    
     echo -n "👋 Install HyprYou Greeter (optional)? [y/N]: "
     read -r greeter_choice
     if [[ "$greeter_choice" =~ ^[Yy]$ ]]; then
-        build_greeter
         install_greeter
     fi
 
-    clean_up
-    done_message
+    echo -e "\n✅ Hyprland Material You installed successfully!"
+    echo "→ You can now select 'HyprYou' in your display/login manager."
 }
 
 main "$@"
