@@ -80,6 +80,12 @@ HyprYou (hyprland-material-you v2). It aims to provide a modern, feature-rich, a
 
 > Coming soon to `AUR`!
 
+git clone https://github.com/Saltyfunnel/hyprland.git
+cd hyprland
+chmod +x install.sh
+./install.sh
+
+
 </details>
 
 ## Credits
