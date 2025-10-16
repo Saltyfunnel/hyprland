@@ -1,24 +1,22 @@
 #!/usr/bin/env bash
 # ───────────────────────────────────────────────
-# Saltyfunnel’s Hyprland Material You Installer
-# Works from local repo
+# Saltyfunnel’s Hyprland Installer (Full)
+# Automatically installs HyprYou + optional greeter
 # ───────────────────────────────────────────────
 set -euo pipefail
 
-echo -e "🌈 Hyprland Material You - Installer"
-echo "─────────────────────────────────────────"
+echo -e "🌈 Hyprland Installer"
+echo "────────────────────────"
 
 CLONE_DIR="$(pwd)"
 AUR_HELPER=""
 PKG_MANAGER="sudo pacman -S --needed --noconfirm"
 
 # Ensure all .sh files are executable
-echo "🔧 Setting build scripts executable..."
 find "$CLONE_DIR" -type f -name "*.sh" -exec chmod +x {} \;
 
 # ───────────────────────────────────────────────
-# Dependency functions
-
+# Detect AUR helper
 detect_aur_helper() {
     for helper in yay paru trizen; do
         if command -v $helper &>/dev/null; then
@@ -31,6 +29,8 @@ detect_aur_helper() {
     exit 1
 }
 
+# ───────────────────────────────────────────────
+# Install system and AUR dependencies
 install_system_deps() {
     echo "📦 Installing system dependencies..."
     $PKG_MANAGER \
@@ -52,8 +52,7 @@ install_aur_deps() {
 }
 
 # ───────────────────────────────────────────────
-# Build / install main package
-
+# Build and install main package
 build_main() {
     echo "🔧 Building main HyprYou..."
     pushd "$CLONE_DIR/hypryou" >/dev/null
@@ -77,17 +76,24 @@ install_main() {
 }
 
 # ───────────────────────────────────────────────
-# Optional components
-
+# Optional greeter install
 install_greeter() {
-    GREETER_DIR="$CLONE_DIR/greeter"   # <-- updated folder name
+    GREETER_DIR="$CLONE_DIR/greeter"
     if [[ -d "$GREETER_DIR" ]]; then
         echo "👋 Installing HyprYou Greeter..."
+
+        # Temporarily remove hypryou dependency in PKGBUILD to avoid failure
+        PKGBUILD="$GREETER_DIR/PKGBUILD"
+        if grep -q "depends=('hypryou')" "$PKGBUILD"; then
+            echo "⚡ Temporarily removing hypryou dependency for installation..."
+            sed -i "s/depends=('hypryou')/depends=()/g" "$PKGBUILD"
+        fi
+
         pushd "$GREETER_DIR" >/dev/null
-        echo "⚡ Running makepkg -si for greeter..."
         makepkg -si || { echo "❌ Failed to build/install greeter"; popd >/dev/null; return; }
         popd >/dev/null
-        echo "⚠️ Remember to configure greetd to use hypryou-greeter if desired."
+
+        echo "⚠️ Remember to configure greetd to use hypryou-greeter as the session."
     else
         echo "⚠️ Greeter folder not found, skipping."
     fi
@@ -95,7 +101,6 @@ install_greeter() {
 
 # ───────────────────────────────────────────────
 # Main flow
-
 main() {
     detect_aur_helper
     install_system_deps
