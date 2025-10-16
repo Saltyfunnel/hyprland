@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ───────────────────────────────────────────────
 # Saltyfunnel’s Hyprland One-Shot Installer (Working)
-# Builds main HyprYou manually, then installs utils & greeter
+# Main + utils + greeter
 # ───────────────────────────────────────────────
 set -euo pipefail
 
@@ -13,7 +13,6 @@ AUR_HELPER=""
 PKG_MANAGER="sudo pacman -S --needed --noconfirm"
 
 # Make all .sh files executable
-echo "🔧 Setting build scripts executable..."
 find "$CLONE_DIR" -type f -name "*.sh" -exec chmod +x {} \;
 
 # ───────────────────────────────────────────────
@@ -77,27 +76,40 @@ install_main() {
 }
 
 # ───────────────────────────────────────────────
-# Build a package folder with PKGBUILD (utils or greeter)
-build_pkg() {
-    local dir="$1"
-    if [[ -d "$dir" ]]; then
-        echo "🔧 Building and installing package in $dir..."
-        pushd "$dir" >/dev/null
-
-        # Remove dependency on hypryou for greeter to avoid errors
-        if [[ "$dir" == "greeter" ]] && grep -q "depends=('hypryou')" PKGBUILD; then
-            sed -i "s/depends=('hypryou')/depends=()/g" PKGBUILD
-        fi
-
-        makepkg -si --noconfirm || { echo "❌ Failed to build/install $dir"; popd >/dev/null; exit 1; }
-        popd >/dev/null
+# Build hypryou-utils manually
+build_utils() {
+    if [[ -f "$CLONE_DIR/hypryou-utils/hyprland-dialog.c" ]]; then
+        echo "🧩 Building hypryou-utils..."
+        gcc "$CLONE_DIR/hypryou-utils/hyprland-dialog.c" -o hyprland-dialog \
+            $(pkg-config --cflags --libs gtk4) \
+            -Wall -Wextra -Wpedantic -Wshadow -Wformat=2 \
+            -Wcast-align -Wconversion -Wstrict-overflow=5 -O2
+        sudo install -Dm755 hyprland-dialog /usr/bin/hyprland-dialog
     else
-        echo "⚠️ Folder $dir not found, skipping."
+        echo "⚠️ hypryou-utils C file not found, skipping."
     fi
 }
 
 # ───────────────────────────────────────────────
-# Main installer flow
+# Build greeter via makepkg
+build_greeter() {
+    if [[ -d "$CLONE_DIR/greeter" ]]; then
+        echo "👋 Building and installing hypryou-greeter..."
+        pushd "$CLONE_DIR/greeter" >/dev/null
+        # Remove dependency on hypryou to avoid makepkg failure
+        if grep -q "depends=('hypryou')" PKGBUILD; then
+            sed -i "s/depends=('hypryou')/depends=()/g" PKGBUILD
+        fi
+        makepkg -si --noconfirm || { echo "❌ Failed to build/install greeter"; popd >/dev/null; exit 1; }
+        popd >/dev/null
+        echo "⚠️ Remember to configure greetd to use hypryou-greeter as the session."
+    else
+        echo "⚠️ Greeter folder not found, skipping."
+    fi
+}
+
+# ───────────────────────────────────────────────
+# Main installer
 main() {
     detect_aur_helper
     install_system_deps
@@ -106,12 +118,8 @@ main() {
     build_main
     install_main
 
-    # Build utils
-    build_pkg "hypryou-utils"
-
-    # Build greeter automatically
-    build_pkg "greeter"
-    echo "⚠️ Remember to configure greetd to use hypryou-greeter as the session."
+    build_utils
+    build_greeter
 
     echo -e "\n✅ Hyprland Material You fully installed!"
     echo "→ You can now select 'HyprYou' in your display/login manager."
