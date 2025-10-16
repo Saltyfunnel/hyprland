@@ -20,6 +20,11 @@ AUR_HELPER=""
 PKG_MANAGER="sudo pacman -S --needed --noconfirm"
 
 # ───────────────────────────────────────────────
+# Ensure all .sh files are executable
+echo "🔧 Setting build scripts executable..."
+find "$CLONE_DIR" -type f -name "*.sh" -exec chmod +x {} \;
+
+# ───────────────────────────────────────────────
 # Helper functions
 
 detect_aur_helper() {
