@@ -1,0 +1,60 @@
+AUR:
+python-materialyoucolor-git
+libastal-bluetooth-git
+libastal-wireplumber-git
+ttf-material-symbols-variable-git
+
+Sync:
+gtk4-layer-shell
+dart-sass
+python
+python-gobject
+python-pam
+gtk4
+libgirepository
+hyprland
+dbus
+dbus-glib
+python-pillow
+cairo
+libnm
+cython
+hyprsunset
+upower
+python-pywayland
+cliphist
+xdg-dbus-proxy
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+xdg-desktop-portal-hyprland
+xdg-utils
+polkit-gnome
+adw-gtk-theme
+greetd
+python-cairo
+networkmanager
+hyprshot
+
+Versions:
+"Used" means I used this version when I was developing, so these versions are 100% compatible
+- Python: Recommended >= 3.13, Minimum >= 3.12
+- python-gobject: Used 3.52.3-3
+- libgirepository: Used 1.84.0-1
+- dart-sass: Used 1.86.3-1
+- gtk4: Used 1:4.18.4-1
+- gtk4-layer-shell: Used 1.1.1-1
+- dbus: Used 1.16.2-1
+- dbus-glib: Used 0.114-1
+- python-pillow: Used 11.2.1-1
+- cairo: Used 1.18.4-1
+- libnm: Used 1.52.0-1
+- cython: Used 3.0.12-1
+- hyprsunset: Used 0.2.0-4
+- python-pam: Used 2.0.2-4
+- python-materialyoucolor: Used 2.0.10
+- python-pywayland: Used 0.4.18-2
+- upower: Used 1.90.9-1
+- libastal-bluetooth-git: Used r788.36f1daf-1
+- libastal-wireplumber-git: Used r788.36f1daf-1
+- cliphist: Used 1:0.6.1-1
+
