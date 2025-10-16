@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ───────────────────────────────────────────────
-# Saltyfunnel’s Hyprland One-Shot Installer (Working)
-# Main + utils + greeter
+# Saltyfunnel’s Hyprland One-Shot Installer (Ready-to-Use)
+# Works directly from the repo, fully automated
 # ───────────────────────────────────────────────
 set -euo pipefail
 
