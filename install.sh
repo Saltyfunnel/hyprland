@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ───────────────────────────────────────────────
-# Saltyfunnel’s Hyprland Installer (Full)
-# Automatically installs HyprYou + optional greeter
+# Saltyfunnel’s Hyprland Installer (Full Automated)
+# Installs HyprYou + optional greeter
 # ───────────────────────────────────────────────
 set -euo pipefail
 
@@ -12,7 +12,8 @@ CLONE_DIR="$(pwd)"
 AUR_HELPER=""
 PKG_MANAGER="sudo pacman -S --needed --noconfirm"
 
-# Ensure all .sh files are executable
+# Make all .sh files executable
+echo "🔧 Setting build scripts executable..."
 find "$CLONE_DIR" -type f -name "*.sh" -exec chmod +x {} \;
 
 # ───────────────────────────────────────────────
@@ -30,7 +31,7 @@ detect_aur_helper() {
 }
 
 # ───────────────────────────────────────────────
-# Install system and AUR dependencies
+# Install dependencies
 install_system_deps() {
     echo "📦 Installing system dependencies..."
     $PKG_MANAGER \
@@ -52,7 +53,7 @@ install_aur_deps() {
 }
 
 # ───────────────────────────────────────────────
-# Build and install main package
+# Build & install main HyprYou
 build_main() {
     echo "🔧 Building main HyprYou..."
     pushd "$CLONE_DIR/hypryou" >/dev/null
@@ -76,16 +77,16 @@ install_main() {
 }
 
 # ───────────────────────────────────────────────
-# Optional greeter install
+# Optional greeter installation (auto-fixes dependency)
 install_greeter() {
     GREETER_DIR="$CLONE_DIR/greeter"
     if [[ -d "$GREETER_DIR" ]]; then
         echo "👋 Installing HyprYou Greeter..."
 
-        # Temporarily remove hypryou dependency in PKGBUILD to avoid failure
+        # Temporarily remove hypryou dependency to prevent target not found error
         PKGBUILD="$GREETER_DIR/PKGBUILD"
         if grep -q "depends=('hypryou')" "$PKGBUILD"; then
-            echo "⚡ Temporarily removing hypryou dependency for installation..."
+            echo "⚡ Temporarily removing hypryou dependency for greeter installation..."
             sed -i "s/depends=('hypryou')/depends=()/g" "$PKGBUILD"
         fi
 
@@ -100,7 +101,7 @@ install_greeter() {
 }
 
 # ───────────────────────────────────────────────
-# Main flow
+# Main installer flow
 main() {
     detect_aur_helper
     install_system_deps
