@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
-# Hyprland Material You one-shot installer (Full version)
-# Author: Adapted for automation by ChatGPT (GPT-5)
-# For Arch/EndeavourOS/Garuda systems
+# ───────────────────────────────────────────────
+#  Saltyfunnel’s Hyprland Material You Installer
+# ───────────────────────────────────────────────
+# Based on: koeqaife/hyprland-material-you
+# Adapted for automation by ChatGPT (GPT-5)
+# For: Arch / EndeavourOS / Garuda systems
+# ───────────────────────────────────────────────
+
 set -euo pipefail
+
+echo -e "🌈 Welcome to Saltyfunnel’s Hyprland (Material You Edition) Installer!"
+echo "───────────────────────────────────────────────"
+sleep 1
 
 REPO="https://github.com/koeqaife/hyprland-material-you.git"
 CLONE_DIR="$HOME/.cache/hyprland-material-you"
@@ -20,7 +29,7 @@ detect_aur_helper() {
             return
         fi
     done
-    echo "❌ No AUR helper found. Please install yay or paru."
+    echo "❌ No AUR helper found. Please install yay or paru first."
     exit 1
 }
 
@@ -45,7 +54,7 @@ pacman_install() {
 }
 
 clone_repo() {
-    echo "📥 Cloning repository..."
+    echo "📥 Cloning Hyprland Material You repository..."
     rm -rf "$CLONE_DIR"
     git clone --depth=1 "$REPO" "$CLONE_DIR"
 }
@@ -87,18 +96,18 @@ install_main() {
 }
 
 install_utils() {
-    echo "🧰 Installing Utils..."
+    echo "🧰 Installing HyprYou Utils..."
     sudo mkdir -p /usr/share/hypryou-utils
     sudo cp -r "$CLONE_DIR/hypryou-utils" /usr/lib/
     sudo install -Dm755 "$CLONE_DIR/hypryou-utils/hypryou-utils" /usr/bin/hypryou-utils
 }
 
 install_greeter() {
-    echo "🙋 Installing Greeter..."
+    echo "🙋 Installing HyprYou Greeter..."
     sudo mkdir -p /usr/share/hypryou-greeter
     sudo cp -r "$CLONE_DIR/hypryou-greeter" /usr/lib/
     sudo install -Dm755 "$CLONE_DIR/hypryou-greeter/hypryou-greeter" /usr/bin/hypryou-greeter
-    echo "⚠️ Remember to configure greetd to use hypryou-greeter if desired."
+    echo "⚠️  Remember to configure greetd to use hypryou-greeter if desired."
 }
 
 clean_up() {
@@ -107,17 +116,21 @@ clean_up() {
 }
 
 done_message() {
-    echo -e "\n✅ Hyprland Material You installed successfully!"
+    echo -e "\n✅ Installation complete!"
+    echo "🚀 Welcome to Saltyfunnel’s Hyprland (Material You Edition)"
+    echo "───────────────────────────────────────────────"
     echo "→ You can now select 'HyprYou' in your display/login manager."
     echo "→ If you installed the Greeter, edit /etc/greetd/config.toml to enable it."
+    echo -e "\n💡 Tip: Restart your session or reboot to apply changes fully."
 }
 
 # ───────────────────────────────────────────────
 # Main flow
 
 main() {
-    echo "🌈 Hyprland Material You - Full Installer"
+    echo "🌈 Saltyfunnel’s Hyprland Installer (Material You Edition)"
     echo "─────────────────────────────────────────"
+
     detect_aur_helper
     pacman_install
     aur_install
