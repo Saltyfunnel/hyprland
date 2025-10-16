@@ -86,5 +86,5 @@ HyprYou (hyprland-material-you v2). It aims to provide a modern, feature-rich, a
 
 Original project by [koeqaife](https://github.com/koeqaife/hyprland-material-you)  
 Modified and packaged by [Saltyfunnel](https://github.com/Saltyfunnel)  
-Includes automated installer: `install-hypryou.sh`
+Includes automated installer: `install.sh`
 
