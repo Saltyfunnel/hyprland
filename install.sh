@@ -13,8 +13,9 @@ echo -e "🌈 Welcome to Saltyfunnel’s Hyprland (Material You Edition) Install
 echo "───────────────────────────────────────────────"
 sleep 1
 
+# Use the current folder as repo path
+CLONE_DIR="$(pwd)"
 REPO="https://github.com/koeqaife/hyprland-material-you.git"
-CLONE_DIR="$HOME/.cache/hyprland-material-you"
 AUR_HELPER=""
 PKG_MANAGER="sudo pacman -S --needed --noconfirm"
 
@@ -54,34 +55,51 @@ pacman_install() {
 }
 
 clone_repo() {
-    echo "📥 Cloning Hyprland Material You repository..."
-    rm -rf "$CLONE_DIR"
-    git clone --depth=1 "$REPO" "$CLONE_DIR"
+    echo "📥 Cloning Hyprland Material You repository (if needed)..."
+    # Only clone if folder doesn't exist
+    if [[ ! -d "$CLONE_DIR/hypryou" ]]; then
+        git clone --depth=1 "$REPO" "$CLONE_DIR"
+    else
+        echo "ℹ️ Repo folder already exists, skipping clone."
+    fi
 }
 
 build_main() {
     echo "🔧 Building main HyprYou..."
-    pushd "$CLONE_DIR/hypryou" >/dev/null
-    ./build.sh || { echo "❌ Build failed (hypryou)."; exit 1; }
-    popd >/dev/null
+    if [[ -d "$CLONE_DIR/hypryou" ]]; then
+        pushd "$CLONE_DIR/hypryou" >/dev/null
+        ./build.sh || { echo "❌ Build failed (hypryou)."; exit 1; }
+        popd >/dev/null
 
-    pushd "$CLONE_DIR/build" >/dev/null
-    ./build.sh || { echo "❌ Build failed (main build)."; exit 1; }
-    popd >/dev/null
+        pushd "$CLONE_DIR/build" >/dev/null
+        ./build.sh || { echo "❌ Build failed (main build)."; exit 1; }
+        popd >/dev/null
+    else
+        echo "❌ Main hypryou folder missing, cannot build."
+        exit 1
+    fi
 }
 
 build_utils() {
-    echo "🧩 Building HyprYou Utils..."
-    pushd "$CLONE_DIR/hypryou-utils" >/dev/null
-    ./build.sh || { echo "❌ Build failed (utils)."; exit 1; }
-    popd >/dev/null
+    if [[ -d "$CLONE_DIR/hypryou-utils" ]]; then
+        echo "🧩 Building HyprYou Utils..."
+        pushd "$CLONE_DIR/hypryou-utils" >/dev/null
+        ./build.sh || { echo "❌ Build failed (utils)."; exit 1; }
+        popd >/dev/null
+    else
+        echo "⚠️ Skipping Utils: folder not found."
+    fi
 }
 
 build_greeter() {
-    echo "👋 Building HyprYou Greeter..."
-    pushd "$CLONE_DIR/hypryou-greeter" >/dev/null
-    ./build.sh || { echo "❌ Build failed (greeter)."; exit 1; }
-    popd >/dev/null
+    if [[ -d "$CLONE_DIR/hypryou-greeter" ]]; then
+        echo "👋 Building HyprYou Greeter..."
+        pushd "$CLONE_DIR/hypryou-greeter" >/dev/null
+        ./build.sh || { echo "❌ Build failed (greeter)."; exit 1; }
+        popd >/dev/null
+    else
+        echo "⚠️ Skipping Greeter: folder not found."
+    fi
 }
 
 install_main() {
@@ -96,23 +114,31 @@ install_main() {
 }
 
 install_utils() {
-    echo "🧰 Installing HyprYou Utils..."
-    sudo mkdir -p /usr/share/hypryou-utils
-    sudo cp -r "$CLONE_DIR/hypryou-utils" /usr/lib/
-    sudo install -Dm755 "$CLONE_DIR/hypryou-utils/hypryou-utils" /usr/bin/hypryou-utils
+    if [[ -d "$CLONE_DIR/hypryou-utils" ]]; then
+        echo "🧰 Installing HyprYou Utils..."
+        sudo mkdir -p /usr/share/hypryou-utils
+        sudo cp -r "$CLONE_DIR/hypryou-utils" /usr/lib/
+        sudo install -Dm755 "$CLONE_DIR/hypryou-utils/hypryou-utils" /usr/bin/hypryou-utils
+    else
+        echo "⚠️ Skipping Utils installation: folder not found."
+    fi
 }
 
 install_greeter() {
-    echo "🙋 Installing HyprYou Greeter..."
-    sudo mkdir -p /usr/share/hypryou-greeter
-    sudo cp -r "$CLONE_DIR/hypryou-greeter" /usr/lib/
-    sudo install -Dm755 "$CLONE_DIR/hypryou-greeter/hypryou-greeter" /usr/bin/hypryou-greeter
-    echo "⚠️  Remember to configure greetd to use hypryou-greeter if desired."
+    if [[ -d "$CLONE_DIR/hypryou-greeter" ]]; then
+        echo "🙋 Installing HyprYou Greeter..."
+        sudo mkdir -p /usr/share/hypryou-greeter
+        sudo cp -r "$CLONE_DIR/hypryou-greeter" /usr/lib/
+        sudo install -Dm755 "$CLONE_DIR/hypryou-greeter/hypryou-greeter" /usr/bin/hypryou-greeter
+        echo "⚠️ Remember to configure greetd to use hypryou-greeter if desired."
+    else
+        echo "⚠️ Skipping Greeter installation: folder not found."
+    fi
 }
 
 clean_up() {
     echo "🧹 Cleaning up temporary files..."
-    rm -rf "$CLONE_DIR"
+    # No deletion needed if using repo folder directly
 }
 
 done_message() {
