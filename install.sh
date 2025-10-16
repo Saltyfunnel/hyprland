@@ -80,10 +80,11 @@ install_main() {
 # Optional components
 
 install_greeter() {
-    if [[ -d "$CLONE_DIR/hypryou-greeter" ]]; then
+    GREETER_DIR="$CLONE_DIR/greeter"   # <-- updated folder name
+    if [[ -d "$GREETER_DIR" ]]; then
         echo "👋 Installing HyprYou Greeter..."
-        pushd "$CLONE_DIR/hypryou-greeter" >/dev/null
-        echo "⚡ Running makepkg -si for hypryou-greeter..."
+        pushd "$GREETER_DIR" >/dev/null
+        echo "⚡ Running makepkg -si for greeter..."
         makepkg -si || { echo "❌ Failed to build/install greeter"; popd >/dev/null; return; }
         popd >/dev/null
         echo "⚠️ Remember to configure greetd to use hypryou-greeter if desired."
@@ -104,7 +105,7 @@ main() {
     install_main
 
     echo -e "\n⚠️ hypryou-utils is optional and must be installed manually with makepkg -si in hypryou-utils/"
-    
+
     echo -n "👋 Install HyprYou Greeter (optional)? [y/N]: "
     read -r greeter_choice
     if [[ "$greeter_choice" =~ ^[Yy]$ ]]; then
